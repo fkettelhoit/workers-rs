@@ -340,11 +340,15 @@ impl<'a, D: 'a> Router<'a, D> {
             }
         }
 
-        if let Ok(Match { value, .. }) = or_else_any_method_handler.at(&req.path()) {
+        if let Ok(Match { value, params }) = or_else_any_method_handler.at(&req.path()) {
+            let mut par: RouteParams = HashMap::new();
+            for (ident, value) in params.iter() {
+                par.insert(ident.into(), value.into());
+            }
             let route_info = RouteContext {
                 data,
                 env,
-                params: HashMap::new(),
+                params: par,
             };
             return match value {
                 Handler::Sync(func) => (func)(req, route_info),
